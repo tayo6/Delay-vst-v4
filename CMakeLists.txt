@@ -3,18 +3,14 @@ project(DelayPlugin VERSION 1.0.0)
 
 set(CMAKE_CXX_STANDARD 17)
 
-# Download CPM.cmake to manage dependencies automatically
-if(NOT EXISTS ${CMAKE_BINARY_DIR}/cmake/CPM.cmake)
-    file(DOWNLOAD https://github.com/cpm-cmake/CPM.cmake/releases/latest/download/CPM.cmake ${CMAKE_BINARY_DIR}/cmake/CPM.cmake)
-endif()
-include(${CMAKE_BINARY_DIR}/cmake/CPM.cmake)
-
-# Fetch JUCE 7.0.12
-CPMAddPackage(
-    NAME JUCE
-    GITHUB_REPOSITORY juce-framework/JUCE
+# Use FetchContent to download JUCE 7.0.12 directly
+include(FetchContent)
+FetchContent_Declare(
+    JUCE
+    GIT_REPOSITORY https://github.com/juce-framework/JUCE.git
     GIT_TAG 7.0.12
 )
+FetchContent_MakeAvailable(JUCE)
 
 juce_add_plugin(DelayPlugin
     COMPANY_NAME "CustomDSP"
