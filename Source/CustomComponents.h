@@ -19,10 +19,7 @@ public:
         auto radius = juce::jmin(bounds.getWidth(), bounds.getHeight()) / 2.0f;
         
         // Use animated value if available for smooth ease-out ring fill
-        float displayPos = sliderPos;
-        if (auto* animVal = slider.getProperties().getDynamicObject("animVal")) {
-            displayPos = (float)animVal->getProperty("val");
-        }
+        float displayPos = (float) slider.getProperties().getWithDefault("animVal", (double)sliderPos);
         
         auto toAngle = rotaryStartAngle + displayPos * (rotaryEndAngle - rotaryStartAngle);
         auto lineW = 4.0f; 
@@ -67,7 +64,7 @@ public:
     void timerCallback() override {
         angleY += 0.02f;
         angleX += 0.01f;
-        float t = juce::getMillisecondCounter() / 1000.0f;
+        float t = juce::Time::getMillisecondCounter() / 1000.0f;
         float period = 3.0f; // 3000ms duration
         offsetY = 8.0f * std::sin(2.0f * juce::MathConstants<float>::pi * t / period);
         repaint();
@@ -100,7 +97,7 @@ public:
             path.startNewSubPath(projected[edges[i][0]][0], projected[edges[i][0]][1]);
             path.lineTo(projected[edges[i][1]][0], projected[edges[i][1]][1]);
         }
-        g.strokePath(path, juce::PathStrokeType(strokeWidth));
+        g.strokePath(path, juce::PathStrokeType((float)strokeWidth));
     }
 private:
     juce::Colour color;
@@ -122,7 +119,7 @@ public:
         g.setFont(juce::Font(14.0f, juce::Font::bold));
         g.drawText("DELAY", 10, 10, 100, 20, juce::Justification::left);
         juce::Path chevron;
-        chevron.startNewSubPath(60, 15); chevron.lineTo(65, 20); chevron.lineTo(70, 15);
+        chevron.startNewSubPath(60.0f, 15.0f); chevron.lineTo(65.0f, 20.0f); chevron.lineTo(70.0f, 15.0f);
         g.strokePath(chevron, juce::PathStrokeType(2.0f));
     }
     void resized() override {
@@ -148,7 +145,7 @@ public:
     }
     void mouseEnter(const juce::MouseEvent&) override { targetScale = 1.05f; startTimerHz(60); }
     void mouseExit(const juce::MouseEvent&) override { targetScale = 1.0f; startTimerHz(60); }
-    void valueChanged() override { targetDrawVal = valueToProportionOfLength(getValue()); startTimerHz(60); }
+    void valueChanged() override { targetDrawVal = (float)valueToProportionOfLength(getValue()); startTimerHz(60); }
 
     void timerCallback() override {
         bool shouldRepaint = false;
@@ -159,9 +156,9 @@ public:
         float valDiff = targetDrawVal - currentDrawVal;
         if (std::abs(valDiff) > 0.001f) { 
             currentDrawVal += valDiff * 0.2f; 
-            getProperties().set("animVal", currentDrawVal); 
+            getProperties().set("animVal", (double)currentDrawVal); 
             shouldRepaint = true; 
-        } else { currentDrawVal = targetDrawVal; getProperties().set("animVal", currentDrawVal); }
+        } else { currentDrawVal = targetDrawVal; getProperties().set("animVal", (double)currentDrawVal); }
         
         if (shouldRepaint) repaint(); else stopTimer();
     }
@@ -192,10 +189,10 @@ public:
     void paint(juce::Graphics& g) override {
         auto bounds = getLocalBounds().toFloat();
         g.setColour(juce::Colour::fromString("FFE5E7EB")); g.fillRoundedRectangle(bounds, 2.0f);
-        int segments = 20; float segHeight = bounds.getHeight() / segments; float gap = 2.0f;
+        int segments = 20; float segHeight = bounds.getHeight() / (float)segments; float gap = 2.0f;
         for(int i=0; i<segments; ++i) {
             float segTop = bounds.getHeight() - (i + 1) * segHeight + gap;
-            float segLevel = (float)i / segments;
+            float segLevel = (float)i / (float)segments;
             juce::Colour c = (segLevel > 0.8f) ? juce::Colour::fromString("FFFB923C") : 
                              (segLevel > 0.6f) ? juce::Colour::fromString("FFFACC15") : 
                              juce::Colour::fromString("FF4ADE80");
@@ -220,8 +217,8 @@ public:
         g.setColour(activeColor);
         g.fillEllipse(currentX, 2.0f, bounds.getHeight() - 4.0f, bounds.getHeight() - 4.0f);
         g.setColour(juce::Colour::fromString("FF6B7280")); g.setFont(10.0f);
-        g.drawText(labelLeft, 0, 0, bounds.getWidth()/2, bounds.getHeight(), juce::Justification::centred);
-        g.drawText(labelRight, bounds.getWidth()/2, 0, bounds.getWidth()/2, bounds.getHeight(), juce::Justification::centred);
+        g.drawText(labelLeft, 0, 0, (int)(bounds.getWidth()/2), (int)bounds.getHeight(), juce::Justification::centred);
+        g.drawText(labelRight, (int)(bounds.getWidth()/2), 0, (int)(bounds.getWidth()/2), (int)bounds.getHeight(), juce::Justification::centred);
     }
     void mouseDown(const juce::MouseEvent&) override { state = !state; repaint(); }
     void timerCallback() override { repaint(); }
